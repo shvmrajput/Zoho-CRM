@@ -1,0 +1,163 @@
+prefill data from another form in sub form:-
+
+idcpurse = row.Select_Course;
+coursedetais = course[ID == idcpurse];
+row.Fees=coursedetais.Fees;
+row.GST=coursedetais.GST;
+row.Total=coursedetais.Fees + coursedetais.GST;
+disable row.GST;
+disable row.Fees;
+disable row.Total;
+
+
+make three form registration, course, course event in course form four field course name, fees, gst, total in course event form 5 field venue, course (it is lookup of course form with course name field), event name, time, date in registration form in sub form with field :- event name (which is lookup of course event form with event name field), select your course (is lookup of course form with field course name), and fees, gst, total, event time, venue, event date.
+
+eventid = row.Event_name;
+//Get Event details
+evenrec = Course_Event[ID == eventid];
+eventtime = evenrec.Event_Time;
+eventtname = evenrec.Event_Name;
+eventdate = evenrec.Event_Date;
+eventcourse = evenrec.course;
+eventvenue = evenrec.Venue;
+//Get Course 
+eventcourserec = course[ID == eventcourse];
+//Populate data into subform
+row.Fees=eventcourserec.Fees;
+row.GST=eventcourserec.GST;
+row.Total=eventcourserec.Fees + eventcourserec.GST;
+row.Select_Course=eventcourse;
+row.Event_Time=eventtime;
+row.Event_Date=eventdate;
+row.Venue=eventvenue;
+if(row.Fees != null && row.GST != null)
+{
+	row.Total=row.Fees + row.GST;
+}
+else
+{
+	row.Total=0;
+}
+input.Total_Amount = input.Course.sum(Total);
+//Disable column
+disable row.Fees;
+disable row.GST;
+disable row.Total;
+disable row.Event_Time;
+disable row.Event_Date;
+disable row.Venue;
+disable Total_Amount;
+
+for remove coulmn from subform:-
+
+
+Totalampunt = input.Course.sum(Total);
+input.Total_Amount = Totalampunt - row.Total;
+
+
+map data from creator to crm and also map subform data:-
+
+
+existingContact = zoho.crm.searchRecords("Leads","(Email:equals:" + input.Email + ")");
+if(existingContact != null && existingContact.size() > 0)
+{
+	contactId = existingContact.get(0).get("id");
+	contactDataMap = Map();
+	contactDataMap.put("Date_of_Birth",input.Date_of_Birth);
+	contactDataMap.put("Last_Name",input.Last_Name);
+	contactDataMap.put("First_Name",input.First_Name);
+	contactDataMap.put("Phone",input.Phone_Number);
+	contactDataMap.put("Email",input.Email);
+	contactDataMap.put("Speciality1",input.Specialisation);
+	contactDataMap.put("Designations",input.Designation_Prof_Dr_AP_PG);
+	contactDataMap.put("Office_Hospital_Name",input.Hospital_Name);
+	contactDataMap.put("Hospital_Address_1",input.Hospital_Address);
+	contactDataMap.put("Street_Area",input.Street_Area);
+	contactDataMap.put("ZipCode_Enquiry_Official",input.ZipCode_Enquiry_Official);
+	contactDataMap.put("State_Enquiry_Official",input.State_Enquiry_Official);
+	contactDataMap.put("District_Enquiry_Official_d",input.District_Enquiry_Official);
+	contactDataMap.put("Country_Enquiry_Official",input.Country_Enquiry_Official);
+	contactDataMap.put("Home_Flat_No",input.Home_Flat_No);
+	contactDataMap.put("Street_Name",input.Street_Name);
+	contactDataMap.put("Area_Location",input.Area_Location);
+	contactDataMap.put("States_Enquiry_Home",input.States_Enquiry_Home);
+	contactDataMap.put("District_Enquiry_Home",input.District_Enquiry_Home);
+	contactDataMap.put("ZipCode_States_Enquiry_Home",input.ZipCode_States_Enquiry_Home);
+	contactresponse = zoho.crm.updateRecord("Leads",contactId,contactDataMap);
+}
+else
+{
+	contactDataMap = Map();
+	contactDataMap.put("Date_of_Birth",input.Date_of_Birth);
+	contactDataMap.put("Last_Name",input.Last_Name);
+	contactDataMap.put("First_Name",input.First_Name);
+	contactDataMap.put("Phone",input.Phone_Number);
+	contactDataMap.put("Email",input.Email);
+	contactDataMap.put("Speciality1",input.Specialisation);
+	contactDataMap.put("Designations",input.Designation_Prof_Dr_AP_PG);
+	contactDataMap.put("Office_Hospital_Name",input.Hospital_Name);
+	contactDataMap.put("Hospital_Address_1",input.Hospital_Address);
+	contactDataMap.put("Street_Area",input.Street_Area);
+	contactDataMap.put("ZipCode_Enquiry_Official",input.ZipCode_Enquiry_Official);
+	contactDataMap.put("State_Enquiry_Official",input.State_Enquiry_Official);
+	contactDataMap.put("District_Enquiry_Official_d",input.District_Enquiry_Official);
+	contactDataMap.put("Country_Enquiry_Official",input.Country_Enquiry_Official);
+	contactDataMap.put("Home_Flat_No",input.Home_Flat_No);
+	contactDataMap.put("Street_Name",input.Street_Name);
+	contactDataMap.put("Area_Location",input.Area_Location);
+	contactDataMap.put("States_Enquiry_Home",input.States_Enquiry_Home);
+	contactDataMap.put("District_Enquiry_Home",input.District_Enquiry_Home);
+	contactDataMap.put("ZipCode_States_Enquiry_Home",input.ZipCode_States_Enquiry_Home);
+	subformData = List();
+	for each  rec in input.COURSE1
+	{
+		getcourse = course[ID == rec.Select_Course];
+		subformData.add(getcourse.Course_Name1);
+	}
+	contactDataMap.put("Course_Name",subformData);
+	contactresponse = zoho.crm.createRecord("Leads",contactDataMap);
+}
+
+
+
+:-  prefill data from mainform to subform:-
+
+
+if (input.Account != null && input.Account != "") {
+    Accountid = input.Account;
+    res = zoho.crm.getRecordById("Accounts", Accountid.toLong());
+    input.Phone_Number = res.getjson("Phone");
+    disable Phone_Number;
+    input.SubForm.clear();
+    for each tech in Teacher[Accounts == Accountid] {
+        row1 = Teachers_Details_with_Account.SubForm();
+        row1.Teacher_Name = tech.Teacher_Name;
+        row1.Email = tech.Email;
+        row1.Phone_Number = tech.Phone_Number;
+        row1.Employment_Status = tech.Employment_Status;
+        row1.Verification_Status = tech.Verification_Status;
+        row1.Teacher_ID = tech.Teacher_ID;
+        input.SubForm.insert(row1);
+        disable SubForm.Teacher_Name;
+        disable SubForm.Phone_Number;
+        disable SubForm.Email;
+        hide SubForm.Hire_or_Start_Date;
+        hide SubForm.University_Degree;
+        hide SubForm.TESOL_I_Level_Qualification;
+        hide SubForm.Qualification_from_Reputable_body;
+        hide SubForm.Non_education_degree_french_teach_exp;
+        hide SubForm.Evaluator;
+        hide SubForm.Evaluator_Comments;
+        hide SubForm.Accounts;
+        hide SubForm.Unique_Identifier;
+        hide SubForm.Teaching_Adult_English_French_or_Junior_Programs;
+        hide SubForm.Degree_details;
+        hide SubForm.hours_or_more_of_specialized_training;
+        hide SubForm.Degree_in_Education;
+        hide SubForm.Experience_Teaching_French;
+        hide SubForm.Verified_Date;
+        hide SubForm.Teacher_ID ;
+    }
+} else {
+    input.SubForm.clear();
+}
