@@ -1,0 +1,80 @@
+Fetch custom button when we click on that button check with field if field is not empty then send mail other wise not:-
+
+
+///////////////////////////////////////////////
+
+// info salesorder;
+salesorderID = salesorder.get("salesorder_id");
+reference_number = salesorder.get("reference_number");
+// info salesorderID;
+number = salesorder.get("salesorder_number");
+organizationID = organization.get("organization_id");
+custom = salesorder.get("custom_fields");
+for each  fields in custom
+{
+	if(fields.getjson("customfield_id") == "372967000012372031")
+	{
+		value = fields.get("value");
+	}
+}
+if(value != null)
+{
+	sendmail
+	[
+		from :zoho.loginuserid
+		to :"kavita@megnet.co.uk"
+		subject :"Test"
+		message :"<div>Hi Sales<br></div><div><br></div><div>Please find the below comment for <b>Salesorder reference Number -</b>  " + reference_number + " .&nbsp;<br><br> <b>Comments </b>- " + value + " <br><br></div><div>Please update the order again in CRM.<br><br><div>Thank you<br></div><div>Operation Team<br></div><div>Megnet.co.uk</div>"
+	]
+}
+else
+{
+	info "Please give first comments on operation";
+}
+resultMap = Map();
+resultMap.put("message","Salesorder number - " + number);
+resultMap.put("code",0);
+return resultMap;
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+Send message on phone through message api:-
+
+
+
+
+
+// info invoice;
+invoiceID = invoice.get("invoice_id");
+invoicedate = invoice.get("date").toDate();
+organizationID = organization.get("organization_id");
+customer_id = invoice.get("customer_id");
+response1 = zoho.books.getRecordsByID("contacts",organizationID,customer_id,"book");
+contact = response1.get("contact");
+mobile = contact.get("mobile");
+info mobile;
+mobile = "971582073300";
+invoice_url = invoice.get("invoice_url");
+custom = invoice.get("custom_fields");
+for each  fields in custom
+{
+	if(fields.getjson("customfield_id") == "4492414000000080007")
+	{
+		Job_Status = fields.get("value");
+		username = "INFT-flaircar";
+		password = "Flair@12";
+		if(Job_Status == "Payment Received")
+		{
+			response = invokeurl
+			[
+				url :"https://rslr.connectbind.com:8443/bulksms/bulksms?username=" + username + "&password=" + password + "&type=0&dlr=1&destination=" + mobile + "&source=FLAIRCARS&message=Flair Car Service: Your vehicle service is complete! Collect it at our workshop. Thank you for choosing us!"
+				type :POST
+			];
+			info response;
+		}
+	}
+}
+
