@@ -1,0 +1,1257 @@
+matchingContactsmap.put("Referrer_Person_Email",email);
+	// 	matchingContactsmap.put("Referrer_phone",Phone);
+	updatedDeal = zoho.crm.updateRecord("Deals",id,matchingContactsmap);
+	info updatedDeal;
+
+when deal is created book a meeting directly :- 
+
+
+Get_deal_details = zoho.crm.getRecordById("Deals",Did);
+deal_name = Get_deal_details.get("Deal_Name");
+Contact_id = Get_deal_details.get("Contact_Name").get("id");
+Last_Name = zoho.crm.getRecordById("Contacts",Contact_id).get("Last_Name");
+Start_Date1 = Get_deal_details.get("Wedding_Date_and_time");
+Start_Date = Start_Date1 + "T12:40:00+01:00";
+Deal_Name = Get_deal_details.get("Deal_Name");
+//Closing_Date = Start_Date1.addDay(10);
+End_date = Start_Date1 + "T13:40:00+01:00";
+Wedding_Date_and_time = Get_deal_details.get("Wedding_Date_and_time");
+Video_Package = Get_deal_details.get("Video_Package");
+Photo_Package = Get_deal_details.get("Photo_Package");
+//Participants = {{"Email":"kaderiem007@gmail.com","name":"Abdul //Kader","invited":true,"type":"email","participant":"kaderiem007@gmail.com"}};
+Description = "Couple's Name:- " + Last_Name + " =>" + " Wedding_Date_and_time :- " + Wedding_Date_and_time + " =>" + " Video_Package:- " + Video_Package + " =>" + "Photo_Package:- " + Photo_Package;
+mp = Map();
+mp.put("End_DateTime",End_date);
+mp.put("Start_DateTime",Start_Date);
+mp.put("Event_Title",deal_name + " - Weadding");
+mp.put("Description",Description);
+//mp.put("Participants",Participants);
+mp.put("$send_notification",true);
+mp.put("Who_Id",Contact_id);
+mp.put("What_Id",Did);
+mp.put("$se_module","Deals");
+createResp = zoho.crm.createRecord("Events",mp);
+info createResp;
+
+
+
+
+// Using left pad.
+n = 10;
+i = Leftpad(1,n).replaceall(" ", "1,");
+i1 = 1;
+for each n in i
+{
+   i1 = i1 + 1;
+   info i1;
+}
+
+https://forms.zohopublic.eu/amazingteamdk/form/CustomersWeddingDetails/formperma/SfG3ziQob1GiasD26k8alXAHUVpEk1Eafw4bMfoyL6s?First_name=${Leads.First Name}&Last_Name=${Leads.Last Name}&email=${Leads.Email}&phone=${Leads.Phone}
+
+
+
+
+update field with another module :- 
+
+
+// id = "5485619000008298024";
+x = zoho.crm.getRecordById("Deals",id);
+email = x.getjson("Referrer_Person_Email");
+searchCriteria = "(Email:equals:" + email + ")";
+matchingContacts = zoho.crm.searchRecords("Accounts",searchCriteria);
+info matchingContacts;
+for each  SingleConn in matchingContacts
+{
+	Full_Name = SingleConn.get("Account_Name");
+	email = SingleConn.get("Email");
+	connid = SingleConn.get("id");
+	// 	Phone = SingleConn.get("Phone");
+	matchingContactsmap = Map();
+	matchingContactsmap.put("Referrer_name",connid);
+	matchingContactsmap.put("Referrer_Person_Email",email);
+	// 	matchingContactsmap.put("Referrer_phone",Phone);
+	updatedDeal = zoho.crm.updateRecord("Deals",id,matchingContactsmap);
+	info updatedDeal;
+
+
+
+delete lead if users are same in contact module :-
+
+id = "525457000002538444";
+x = zoho.crm.getRecordById("Contacts",id);
+email = x.getjson("Email");
+searchCriteria = "(Email:equals:" + email + ")";
+matchingContacts = zoho.crm.searchRecords("Leads",searchCriteria);
+for each  y in matchingContacts
+{
+	email = y.get("Email");
+	ids = y.get("id");
+	deleteRecordMap = Map();
+	deleteRecordMap.put("module","Leads");
+	deleteRecordMap.put("id",ids);
+	deleteResp = zoho.crm.invokeConnector("crm.delete",deleteRecordMap);
+	info deleteResp;
+}
+
+
+update field in same module:-
+
+// id = "3283385000044554211";
+x = zoho.crm.getRecordById("Project",id);
+Last_Activity = x.getJSON("Last_Activity_Time");
+info Last_Activity;
+searchCriteria = "(Last_Activity_Time:equals:" + Last_Activity + ")";
+matchingContacts = zoho.crm.searchRecords("Project",searchCriteria);
+if(!matchingContacts.isEmpty())
+{
+	matchingContacts = matchingContacts.get(0);
+	matchingContactsId = matchingContacts.get("id");
+	updateMap = Map();
+	updateMap.put("survey_date_time",Last_Activity);
+	updatedProject = zoho.crm.updateRecord("Project",matchingContactsId,updateMap);
+	info updatedProject;
+
+update related field in another module:- 
+
+
+id = "3283385000044554211";
+x = zoho.crm.getRecordById("Project",id);
+survey_date = x.getJSON("survey_date_time");
+//getting data from project module
+data = zoho.crm.getRelatedRecords("feedbacks", "Project", id);
+
+
+for each feedback in data {
+    feedback_id = feedback.get("id");
+    
+    updateMap = Map();
+    updateMap.put("survey_date_times", survey_date);
+    
+    updatedFeedback = zoho.crm.updateRecord("Feedbacks", feedback_id, updateMap);
+    info updatedFeedback;
+}
+
+
+
+add total and update fields in same module :- 
+
+
+// id = "5511313000025344001";
+x = zoho.crm.getRecordById("Quotes",id);
+WindowProlist = {"5511313000011021036","5511313000011021046","5511313000011021056","5511313000011021066","5511313000011021076","5511313000011021086","5511313000011021096","5511313000011021026"};
+DoorProlist = {"5511313000011021106","5511313000018883080","5511313000018883075","5511313000018883070","5511313000011021136"};
+PanelProlist = {"5511313000011021146","5511313000011021156","5511313000011021166","5511313000011021176","5511313000011021186"};
+numOfDoors = 0;
+numOfWindows = 0;
+numOfPannels = 0;
+for each  productDetail in x.get("Product_Details")
+{
+	quantity = productDetail.get("quantity");
+	info quantity;
+	productName = productDetail.get("product").get("name");
+	if(WindowProlist.contains(productDetail.get("product").get("id")))
+	{
+		numOfWindows = numOfWindows + quantity;
+	}
+	else if(DoorProlist.contains(productDetail.get("product").get("id")))
+	{
+		numOfDoors = numOfDoors + quantity;
+	}
+	else if(PanelProlist.contains(productDetail.get("product").get("id")))
+	{
+		numOfPannels = numOfPannels + quantity;
+	}
+}
+updateData = {"Number_of_Doors":numOfDoors,"Number_of_Windows":numOfWindows,"Number_of_Pannels":numOfPannels};
+updatedRecord = zoho.crm.updateRecord("Quotes",id,updateData);
+info updatedRecord;
+
+
+
+:::////@@@@@@@@@@/////////////////////////////--creating a  contact to deals through widget and maps all the fields with contacts to deals and when the deal is create then update the field with false :-
+
+
+Contact_Detilas = zoho.crm.getRecordById("Contacts",con_id);
+// info Contact_Detilas;
+deal_create_data_Map = Map();
+deal_create_data_Map.put("Deal_Source",ifnull(Contact_Detilas.get("Lead_Source"),""));
+deal_create_data_Map.put("Deal_Status",ifnull(Contact_Detilas.get("Contact_Status"),""));
+deal_create_data_Map.put("Deal_Date",ifnull(Contact_Detilas.get("Contact_Date"),""));
+deal_create_data_Map.put("Stage","Already Course Attended");
+deal_create_data_Map.put("Contact_Name",con_id);
+deal_create_data_Map.put("Deal_Name",ifnull(Contact_Detilas.get("First_Name"),""));
+deal_create_data_Map.put("Student_Type",ifnull(Contact_Detilas.get("Customer_Type"),""));
+deal_create_data_Map.put("Salutation",ifnull(Contact_Detilas.get("Salutation"),""));
+deal_create_data_Map.put("Last_Name",ifnull(Contact_Detilas.get("Last_Name"),""));
+deal_create_data_Map.put("Mobile",ifnull(Contact_Detilas.get("Mobile"),""));
+deal_create_data_Map.put("Age",ifnull(Contact_Detilas.get("Age"),""));
+deal_create_data_Map.put("Working_Institution",ifnull(Contact_Detilas.get("Working_Institution"),""));
+deal_create_data_Map.put("Gender",ifnull(Contact_Detilas.get("Gender"),""));
+deal_create_data_Map.put("Designations",ifnull(Contact_Detilas.get("Designations"),""));
+deal_create_data_Map.put("Food",ifnull(Contact_Detilas.get("Food"),""));
+deal_create_data_Map.put("Srub_Size",ifnull(Contact_Detilas.get("Scrub_Size"),""));
+deal_create_data_Map.put("Phone",ifnull(Contact_Detilas.get("Phone"),""));
+deal_create_data_Map.put("Email",ifnull(Contact_Detilas.get("Email"),""));
+deal_create_data_Map.put("Date_of_Birth",ifnull(Contact_Detilas.get("Date_of_Birth"),""));
+deal_create_data_Map.put("Website",ifnull(Contact_Detilas.get("Website"),""));
+deal_create_data_Map.put("Speciality1",ifnull(Contact_Detilas.get("Speciality1"),""));
+deal_create_data_Map.put("Course_Department",ifnull(Contact_Detilas.get("Departments"),""));
+deal_create_data_Map.put("Interested_Courses_for_Future",ifnull(Contact_Detilas.get("Interested_Courses_for_Future"),""));
+deal_create_data_Map.put("Course_Types",ifnull(Contact_Detilas.get("Course_Type"),""));
+deal_create_data_Map.put("Course_Name",ifnull(Contact_Detilas.get("Course_Name"),""));
+deal_create_data_Map.put("Completed_Course",ifnull(Contact_Detilas.get("Completed_Course"),""));
+deal_create_data_Map.put("Training_Venue",ifnull(Contact_Detilas.get("Training_Venue"),""));
+deal_create_data_Map.put("District_Completed_Course",ifnull(Contact_Detilas.get("District_Completed_Course"),""));
+deal_create_data_Map.put("Trainer_Name",ifnull(Contact_Detilas.get("Trainer_Name"),""));
+deal_create_data_Map.put("Course_Certificate_No",ifnull(Contact_Detilas.get("Course_Certificate_No"),""));
+deal_create_data_Map.put("Training_Feedback_Video",ifnull(Contact_Detilas.get("Training_Feedback_Video"),""));
+deal_create_data_Map.put("Training_Feedback_Google_Review",ifnull(Contact_Detilas.get("Training_Feedback_Google_Review"),""));
+deal_create_data_Map.put("Course_Fee_Status",ifnull(Contact_Detilas.get("Course_Fee_Status"),""));
+deal_create_data_Map.put("State_Completed_Course",ifnull(Contact_Detilas.get("State_Completed_Course"),""));
+deal_create_data_Map.put("Course_Date",ifnull(Contact_Detilas.get("Training_Date"),""));
+deal_create_data_Map.put("Course_Reg_No",ifnull(Contact_Detilas.get("Course_Reg_No"),""));
+deal_create_data_Map.put("Course_Fee_Paided",ifnull(Contact_Detilas.get("Course_Fee_Paided"),""));
+deal_create_data_Map.put("CAC_Photo_Courier",ifnull(Contact_Detilas.get("CAC_Photo_Courier"),""));
+deal_create_data_Map.put("Training_Feedback_Paper",ifnull(Contact_Detilas.get("Training_Feedback_Paper"),""));
+deal_create_data_Map.put("Office_Hospital_Name",ifnull(Contact_Detilas.get("Office_Hospital_Name"),""));
+deal_create_data_Map.put("Hospital_Address_2",ifnull(Contact_Detilas.get("Hospital_Address_2"),""));
+deal_create_data_Map.put("ZipCode_Deal_Official",ifnull(Contact_Detilas.get("ZipCode_Enquiry_Official"),""));
+deal_create_data_Map.put("District_Deal_Official",ifnull(Contact_Detilas.get("District_Enquiry_Official"),""));
+deal_create_data_Map.put("Phone_Deal_Official",ifnull(Contact_Detilas.get("Phone_Enquiry_Official"),""));
+deal_create_data_Map.put("Hospital_Address_1",ifnull(Contact_Detilas.get("Hospital_Address_1"),""));
+deal_create_data_Map.put("Street_Area",ifnull(Contact_Detilas.get("Street_Area"),""));
+deal_create_data_Map.put("State_Enquiry_Official",ifnull(Contact_Detilas.get("Stated"),""));
+deal_create_data_Map.put("Email_Deal_Official",ifnull(Contact_Detilas.get("Email_Enquiry_Official"),""));
+deal_create_data_Map.put("Country_Deal_Official",ifnull(Contact_Detilas.get("Country_Enquiry_Official"),""));
+deal_create_data_Map.put("Home_Flat_No",ifnull(Contact_Detilas.get("Home_Flat_No"),""));
+deal_create_data_Map.put("Area_Location_Deal",ifnull(Contact_Detilas.get("Area_Location_Contacts"),""));
+deal_create_data_Map.put("District_Business_Home",ifnull(Contact_Detilas.get("District_Business_Home"),""));
+deal_create_data_Map.put("Home_Phone_No",ifnull(Contact_Detilas.get("Home_Phone_No"),""));
+deal_create_data_Map.put("Street_Name",ifnull(Contact_Detilas.get("Street_Name"),""));
+deal_create_data_Map.put("States_Deal_Home",ifnull(Contact_Detilas.get("State_Enquiry_Official"),""));
+deal_create_data_Map.put("ZipCode_Deals_Home",ifnull(Contact_Detilas.get("ZipCode_States_Enquiry_Home"),""));
+deal_create_data_Map.put("Country_Enquiry_Home",ifnull(Contact_Detilas.get("Country_Enquiry_Home"),""));
+deal_create_data_Map.put("Potential_For",ifnull(Contact_Detilas.get("Potential_For"),""));
+deal_create_data_Map.put("MedCare",ifnull(Contact_Detilas.get("MedCare"),""));
+deal_create_data_Map.put("MedTech",ifnull(Contact_Detilas.get("MedTech"),""));
+deal_create_data_Map.put("Academy",ifnull(Contact_Detilas.get("Academy"),""));
+deal_create_data_Map.put("Promotions",ifnull(Contact_Detilas.get("Promotions"),""));
+deal_create_data_Map.put("Products_Interested",ifnull(Contact_Detilas.get("Products_Interested"),""));
+deal_create_data_Map.put("T_O_Followup_Required",ifnull(Contact_Detilas.get("T_O_Followup_Required"),""));
+deal_create_data_Map.put("Description",ifnull(Contact_Detilas.get("Description"),""));
+deal_create_data_Map.put("Potential_For",ifnull(Contact_Detilas.get("Potential_For"),""));
+deal_create_data_Map.put("MedCare",ifnull(Contact_Detilas.get("MedCare"),""));
+deal_create_data_Map.put("MedTech",ifnull(Contact_Detilas.get("MedTech"),""));
+deal_create_data_Map.put("Academy",ifnull(Contact_Detilas.get("Academy"),""));
+deal_create_data_Map.put("Promotions",ifnull(Contact_Detilas.get("Promotions"),""));
+deal_create_data_Map.put("Products_Interested",ifnull(Contact_Detilas.get("Products_Interested"),""));
+deal_create_data_Map.put("T_O_Followup_Required",ifnull(Contact_Detilas.get("T_O_Followup_Required"),""));
+create_deal_resp = zoho.crm.createRecord("Deals",deal_create_data_Map);
+info create_deal_resp;
+rec_id = create_deal_resp.get("id");
+if(rec_id != Null || rec_id != "")
+{
+	resp = "New Deal Created Successfully";
+	update_contact_data_Map = Map();
+	update_contact_data_Map.put("Contacts_to_Deals",false);
+	update_contact_resp = zoho.crm.updateRecord("Contacts",con_id,update_contact_data_Map);
+	info update_contact_resp;
+}
+else
+{
+	resp = "Deal is not Created";
+}
+
+
+
+/////@@@@@@@@@///////////////////////////////////////////send inventory template with email:-
+
+
+
+data = zoho.crm.getRecordById("Sales_Orders",id);
+recipientName = data.get("Contact_Name").get("name");
+info recipientName;
+send_mail_resp = invokeurl
+[
+	url :"https://zohoapis.eu/crm/v5/settings/inventory_templates/602837000000461188/actions/print_preview?record_id=" + id + "&print_type=pdf"
+	type :GET
+	connection:"inventorytemplate"
+];
+info send_mail_resp;
+sendmail
+[
+	from :"imran@onetouchsupplies.co.uk"
+	to :data.get("Email")
+	subject :"Your order is confirm!"
+	message :"Hi " + recipientName + ", your order is confirmed and is now being processed on " + data.get("Processed_Date_Time") + "."
+	Attachments :file:send_mail_resp
+]
+
+
+///////////@@@@@@///////////////////////////send a mail of quotation in quotation module when we click on button:-
+
+
+data = zoho.crm.getRecordById("Quotes",id);
+cont = data.getjson("Contact_Name").get("id");
+contacts = zoho.crm.getRecordById("Contacts",cont);
+email = contacts.getjson("Email");
+send_mail_resp = invokeurl
+[
+	url :"https://zohoapis.eu/crm/v5/settings/inventory_templates/602837000001889033/actions/print_preview?record_id=" + id + "&print_type=pdf"
+	type :GET
+	connection:"inventorytemplate"
+];
+sendmail
+[
+	from :"imran@onetouchsupplies.co.uk"
+	to :contacts.get("Email")
+	subject :"Quotation"
+	message :"Dear, I'm sending you the quotation please open the attachment and accept the quotation"
+	Attachments :file:send_mail_resp
+]
+return "The mail send successfully";
+
+
+
+////@@@@@//////////////////////////////////send a mail of meeting  in quotation module when we click on button:-
+
+
+data = zoho.crm.getRecordById("Quotes",id);
+cont = data.getjson("Contact_Name").get("id");
+contacts = zoho.crm.getRecordById("Contacts",cont);
+email = contacts.getjson("Email");
+name = contacts.getjson("Full_Name");
+send_mail_resp = invokeurl
+[
+	url :"https://www.zohoapis.eu/crm/v5/settings/email_templates/602837000001927007"
+	type :GET
+	connection:"emailtemplate"
+];
+emailTemplate = send_mail_resp.get("email_templates").get(0).getjson("content");
+emailTemplate = replaceAll(emailTemplate.toString(),"${!Quotes.Contact_Name}",name,true);
+sendmail
+[
+	from :"imran@onetouchsupplies.co.uk"
+	to :contacts.get("Email")
+	subject :"Talk to us"
+	message :emailTemplate.toString()
+]
+// sendmail
+// [
+// 	from :zoho.adminuserid
+// 	to :contacts.get("Email")
+// 	subject :"Talk to us"
+// 	message :emailTemplate.toString()
+// ]
+return "The email sends successfully";
+
+
+
+
+
+///@@@@@/////////////////////////////////////whenever any record is created or edited in crm then it will also be added in creator :-
+
+
+// id = "3580809000081866266";
+teacherData = zoho.crm.getRecordById("Teachers",id);
+Name = teacherData.get("Name");
+creatorTeacherId = teacherData.get("creatorTeacherId");
+Verification_Status = teacherData.get("Verification_Status");
+Hire_or_Start_Date = teacherData.get("Hire_or_Start_Date");
+Email = teacherData.get("Email");
+Phone = teacherData.get("Phone");
+Unique_Identifier = teacherData.get("Unique_Identifier");
+Employment_Status = teacherData.get("Employment_Status");
+Teaching_Adult = teacherData.get("Teaching_Adult_English_French_or_Junior_Programs");
+University_Degree = teacherData.get("University_Degree");
+Degree_details = teacherData.get("Degree_details");
+TESOL_I_Level = teacherData.get("TESOL_I_Level_Qualification");
+hours_or_more = teacherData.get("hours_or_more_of_specialized_training");
+Qualification_from = teacherData.get("Qualification_from_Reputable_body");
+Degree_in_Education = teacherData.get("Degree_in_Education");
+Non_education = teacherData.get("Non_education_degree_french_teach_exp");
+Experience_Teaching = teacherData.get("Experience_Teaching_French");
+Evaluator = teacherData.get("Evaluator");
+Evaluator_Comments = teacherData.get("Evaluator_Comments");
+Verified_Date = teacherData.get("Verified_Date");
+School_Where_Verified = teacherData.get("School_Where_Verified");
+// info School_Where_Verified;
+teacherMap = Map();
+teacherMap.put("Teacher_Name",Name);
+teacherMap.put("Teacher_ID",id.toLong());
+teacherMap.put("Verification_Status",Verification_Status);
+teacherMap.put("Email",Email);
+teacherMap.put("Phone_Number",Phone);
+teacherMap.put("Unique_Identifier",Unique_Identifier);
+teacherMap.put("Employment_Status",Employment_Status);
+teacherMap.put("Teaching_Adult_English_French_or_Junior_Programs",Teaching_Adult);
+teacherMap.put("University_Degree",University_Degree);
+teacherMap.put("Degree_details",Degree_details);
+teacherMap.put("TESOL_I_Level_Qualification",TESOL_I_Level);
+teacherMap.put("hours_or_more_of_specialized_training",hours_or_more);
+teacherMap.put("Qualification_from_Reputable_body",Qualification_from);
+teacherMap.put("Degree_in_Education",Degree_in_Education);
+teacherMap.put("Non_education_degree_french_teach_exp",Non_education);
+teacherMap.put("Experience_Teaching_French",Experience_Teaching);
+teacherMap.put("Evaluator",Evaluator);
+teacherMap.put("Accounts",School_Where_Verified);
+teacherMap.put("updatefromcrm","true");
+teacherMap.put("Evaluator_Comments",Evaluator_Comments);
+info teacherMap;
+optionalmap = Map();
+if(creatorTeacherId == null)
+{
+res = zoho.creator.createRecord("orionassessmentservices","creator-kickstart","Teacher",teacherMap,optionalmap,"zohocreator");
+info res;
+creatorTeacherData = res.get("data");
+creatorTeacherId = creatorTeacherData.get("ID");
+info creatorTeacherId;
+updateteacher = Map();
+updateteacher.put("creatorTeacherId",creatorTeacherId);
+Tech_up = zoho.crm.updateRecord("Teachers",id,updateteacher);
+info Tech_up;
+}
+else
+{
+info "Experience_Teaching";
+updateCreatorTeacher = zoho.creator.updateRecord("orionassessmentservices","creator-kickstart","All_Teachers",creatorTeacherId.toLong(),teacherMap,optionalmap,"zohocreator");
+info updateCreatorTeacher;
+}
+
+
+
+/@@@@@///////////////////////////fetch api from another and write a schedular in crm for whenever any order is created then it will also create and update in crm in sales order :-
+
+
+
+// //  Code Written by Shivam(Businessraisers)shivam.rajput@businessraisers.com
+head = Map();
+head.put("Content-Type","application/json");
+para = {"ApplicationId":"f985cc48-936d-4299-8104-0b057fc1a62a","ApplicationSecret":"c01d247a-9ae8-46cb-8f83-deff69cf95a9","Token":"bef00270-d997-2d94-2f14-190a3793765f"};
+// //Get Linnwork Token
+gettoken = invokeurl
+[
+	url :"https://api.linnworks.net/api/Auth/AuthorizeByApplication"
+	type :POST
+	parameters:para
+	headers:head
+];
+//check og token is not null then we need to get order details
+if(gettoken != null)
+{
+	currentDateTime = zoho.currenttime.toDatetime();
+	fromDate = currentDateTime.subHour(10).toString("yyyy-MM-dd'T'HH:mm:ss'Z'");
+	// 		fromDate = currentDateTime.subYear(5).toString("yyyy-MM-dd'T'HH:mm:ss'Z'");
+	toDate = currentDateTime.addHour(8).toString("yyyy-MM-dd'T'HH:mm:ss'Z'");
+	para1 = {"request":{"PageNumber":1,"DateField":"processed","ResultsPerPage":500,"FromDate":fromDate,"ToDate":toDate,"SearchFilters":{{"SearchField":"Source","SearchTerm":"amazon"}}}};
+	head1 = Map();
+	head1.put("Authorization",gettoken.getjson("Token"));
+	// 	info gettoken;
+	head1.put("Content-Type","application/json");
+	res1 = invokeurl
+	[
+		url :"https://eu-ext.linnworks.net/api/ProcessedOrders/SearchProcessedOrders"
+		type :POST
+		parameters:para1
+		headers:head1
+	];
+}
+ProcessedOrders = res1.getjson("ProcessedOrders");
+if(res1.getjson("ProcessedOrders") != NULL)
+{
+	for each  rr in ProcessedOrders.getjson("Data")
+	{
+		pkOrderID = rr.getJSON("pkOrderID");
+		nOrderId = rr.getJSON("nOrderId");
+		orderHeaders = Map();
+		orderHeaders.put("Authorization",gettoken.getjson("Token"));
+		orderHeaders.put("Content-Type","application/json");
+		orderHeaders.put("accept","application/json");
+		// If process order is not null then we get order tracking details
+		orderResponse = invokeurl
+		[
+			url :"https://eu-ext.linnworks.net/api/Orders/GetOrderById?pkOrderId=" + pkOrderID
+			type :POST
+			headers:orderHeaders
+		];
+		// 		info orderResponse;
+		if(orderResponse != null)
+		{
+			// 			info orderResponse;
+			OrderId = orderResponse.getjson("OrderId");
+			NumOrderId = orderResponse.getjson("NumOrderId");
+			Processed = orderResponse.getjson("Processed");
+			ProcessedDateTime = orderResponse.getjson("ProcessedDateTime");
+			GeneralInfo = orderResponse.getjson("GeneralInfo");
+			Status = GeneralInfo.getjson("Status");
+			ReceivedDate = GeneralInfo.getjson("ReceivedDate");
+			Source = GeneralInfo.getjson("Source");
+			SubSource = GeneralInfo.getjson("SubSource");
+			HoldOrCancel = GeneralInfo.getjson("HoldOrCancel");
+			DespatchByDate = GeneralInfo.getjson("DespatchByDate");
+			ShippingInfo = orderResponse.getjson("ShippingInfo");
+			Vendor = ShippingInfo.getjson("Vendor");
+			PostalServiceName = ShippingInfo.getjson("PostalServiceName");
+			TrackingNumber = ShippingInfo.getjson("TrackingNumber");
+			CustomerInfo = orderResponse.getjson("CustomerInfo");
+			ChannelBuyerName = CustomerInfo.getjson("ChannelBuyerName");
+			Address = CustomerInfo.getjson("Address");
+			EmailAddress = Address.getjson("EmailAddress");
+			Address1 = Address.getjson("Address1");
+			Address2 = Address.getjson("Address2");
+			Town = Address.getjson("Town");
+			Region = Address.getjson("Region");
+			PostCode = Address.getjson("PostCode");
+			Country = Address.getjson("Country");
+			FullName = Address.getjson("FullName");
+			Company = Address.getjson("Company");
+			PhoneNumber = Address.getjson("PhoneNumber");
+			TotalsInfo = orderResponse.getjson("TotalsInfo");
+			Subtotal = TotalsInfo.getjson("Subtotal");
+			PostageCost = TotalsInfo.getjson("PostageCost");
+			Items = orderResponse.getjson("Items");
+			ShippingCost = Items.getjson("ShippingCost");
+			TotalCharge = TotalsInfo.getjson("TotalCharge");
+			CountryTaxRate = TotalsInfo.getjson("CountryTaxRate");
+			ConversionRate = TotalsInfo.getjson("ConversionRate");
+		}
+		contactid = "";
+		if(EmailAddress != "")
+		{
+			getcon = zoho.crm.searchRecords("Contacts","Email:equals:" + EmailAddress + "");
+			// 			info getcon;
+			if(!isEmpty(getcon))
+			{
+				contactid = getcon.get(0).getJSON("id");
+			}
+		}
+		if(PhoneNumber != "" && contactid == "")
+		{
+			getcon1 = zoho.crm.searchRecords("Contacts","Phone:equals:" + PhoneNumber + "");
+			if(!isEmpty(getcon1))
+			{
+				contactid = getcon1.get(0).getJSON("id");
+			}
+		}
+		if(contactid == "")
+		{
+			NewContactMap = Map();
+			NewContactMap.put("Last_Name",FullName);
+			NewContactMap.put("Email",EmailAddress);
+			NewContactMap.put("Phone",PhoneNumber);
+			NewContactMap.put("Source",Source);
+			NewContactMap.put("Sub_Source",SubSource);
+			NewContactMap.put("Mailing_Street",Address1);
+			NewContactMap.put("Mailing_Country",Country);
+			NewContactMap.put("Mailing_Zip",PostCode);
+			NewContactMap.put("Mailing_State",Region);
+			NewContactMap.put("Other_Street",Address2);
+			NewContactMap.put("Linnworks_Customer_ID",NumOrderId);
+			NewContactMap.put("Company",Company);
+			createdContact = zoho.crm.createRecord("Contacts",NewContactMap);
+			if(createdContact != null)
+			{
+				contactid = createdContact.get("id");
+				info "New contact created with ID: " + contactid;
+			}
+			else
+			{
+				info "Failed to create a new contact: " + createdContact;
+			}
+		}
+		if(contactid != "")
+		{
+			Items = orderResponse.getjson("Items");
+			itemlist = list();
+			ptoductlist_item = list();
+			for each  itemdetails in Items
+			{
+				createproducttag = false;
+				itemmap = Map();
+				Title = itemdetails.getjson("Title");
+				ChannelSKU = itemdetails.getjson("ChannelSKU");
+				SKU = itemdetails.getjson("SKU");
+				ItemNumber = itemdetails.getjson("ItemNumber");
+				Quantity = itemdetails.getjson("Quantity");
+				Cost = itemdetails.getjson("CostIncTax");
+				PricePerUnit = itemdetails.getjson("PricePerUnit");
+				StockItemIntId = itemdetails.getjson("StockItemIntId");
+				DiscountValue = itemdetails.getjson("DiscountValue");
+				Tax = itemdetails.getjson("Tax");
+				taxquan = Tax / Quantity;
+				pricewithouttax = PricePerUnit - taxquan;
+				// 				info pricewithouttax;
+				ItemSource = itemdetails.getjson("ItemSource");
+				getpro = zoho.crm.searchRecords("Products","Product_Code:equals:" + ChannelSKU + "");
+				if(isEmpty(getpro))
+				{
+					if(SKU != null && SKU != "")
+					{
+						getproductdet = zoho.crm.searchRecords("Products","Product_Code:equals:" + SKU + "");
+						info getproductdet + "- " + SKU + " - Check with SKU";
+						if(!isEmpty(getproductdet))
+						{
+							proid = getproductdet.get(0).getjson("id");
+							proname = getproductdet.get(0).getjson("Product_Name");
+							prod_map = Map();
+							prod_map.put("name",proname);
+							prod_map.put("id",proid);
+						}
+						else
+						{
+							createproducttag = true;
+						}
+					}
+					else
+					{
+						createproducttag = true;
+					}
+				}
+				else
+				{
+					proid = getpro.get(0).getjson("id");
+					proname = getpro.get(0).getjson("Product_Name");
+					prod_map = Map();
+					prod_map.put("name",proname);
+					prod_map.put("id",proid);
+				}
+				if(createproducttag = true)
+				{
+					productDetails = Map();
+					productDetails.put("Product_Name",Title);
+					productDetails.put("Product_Code",ChannelSKU);
+					productDetails.put("Product_Active",true);
+					productDetails.put("Taxable",true);
+					taxlist = list();
+					taxmap = Map();
+					taxmap.put("name","Vat");
+					taxmap.put("percentage",20);
+					taxlist.add(taxmap);
+					productDetails.put("Taxes",taxlist);
+					info productDetails;
+					if(ChannelSKU == null && ChannelSKU == "")
+					{
+						productDetails.put("Product_Code",SKU);
+					}
+					createdProduct = zoho.crm.createRecord("Products",productDetails);
+					info createdProduct;
+					proid = createdProduct.getjson("id");
+					prod_map = Map();
+					prod_map.put("Product",Title);
+					prod_map.put("id",proid);
+				}
+				itemmap.put("Product_Name",proid);
+				itemmap.put("Quantity",Quantity);
+				itemmap.put("List_Price",pricewithouttax.round(2));
+				itemmap.put("Discount",DiscountValue);
+				itemmap.put("Item_Tax",Tax.round(7));
+				// 				itemmap.put("line_tax",{{"name":"Vat","percentage":20,"value":Tax,"id":proid}});
+				ptoductlist_item.add(itemmap);
+				// 				info itemmap;
+			}
+			Somap = Map();
+			Somap.put("Contact_Name",contactid);
+			Somap.put("Subject",NumOrderId.toString());
+			Somap.put("Billing_Code",PostCode);
+			Somap.put("Shipping_Code",PostCode);
+			Somap.put("Shipping_Street",Address1);
+			Somap.put("Billing_Street",Address1);
+			Somap.put("Shipping_City",Town);
+			Somap.put("Billing_City",Town);
+			Somap.put("Billing_Country",Country);
+			Somap.put("Shipping_Country",Country);
+			Somap.put("Order_Id",OrderId);
+			Somap.put("Billing_State",Region);
+			Somap.put("Shipping_State",Region);
+			Somap.put("Vendor",Vendor);
+			Somap.put("Ordered_Items",ptoductlist_item);
+			Somap.put("Email",EmailAddress);
+			Somap.put("Phone",PhoneNumber.toString());
+			Somap.put("Source",Source);
+			Somap.put("Postal_Service_Name",PostalServiceName);
+			Somap.put("SubSource",SubSource);
+			Somap.put("processed",Processed.toText());
+			Somap.put("Processed_Date_Time",ProcessedDateTime);
+			Somap.put("Received_Date",ReceivedDate);
+			Somap.put("Hold_Cancel",HoldOrCancel.toString());
+			Somap.put("TrackingNumber",TrackingNumber);
+			Somap.put("Status","Created");
+			Somap.put("Shipping_Cost",PostageCost.round(2));
+			Somap.put("Despatch_Date",DespatchByDate);
+			// 			formattedDespatchDate = DespatchByDate.tostring("YYYY-MM-dd");
+			// 			Somap.put("Due_Date",formattedDespatchDate);
+			// 			info Somap;
+			flist = list();
+			flist.add(Somap);
+			finalmap = Map();
+			finalmap.put("data",flist);
+// 			info finalmap;
+			existingSo = zoho.crm.searchRecords("Sales_Orders","Subject:equals:" + NumOrderId);
+			if(!isEmpty(existingSo))
+			{
+				existingOrderId = existingSo.get(0).get("id");
+				updatedSo = invokeurl
+				[
+					url :"https://www.zohoapis.eu/crm/v2.1/Sales_Orders/" + existingOrderId
+					type :PUT
+					parameters:finalmap.tostring()
+					connection:"inventorytemplate"
+				];
+				info "Updated existing Sales Order - " + updatedSo;
+			}
+			else
+			{
+				createSo = invokeurl
+				[
+					url :"https://www.zohoapis.eu/crm/v2.1/Sales_Orders"
+					type :POST
+					parameters:finalmap.tostring()
+					connection:"inventorytemplate"
+				];
+				info "create Sales Order - " + createSo;
+			}
+		}
+	}
+}
+
+
+
+//////////////////////////@@@@@@@ send inventory template in sales order with attachments :-
+
+
+
+
+
+
+data = zoho.crm.getRecordById("Sales_Orders",id);
+recipientName = data.get("Contact_Name").get("name");
+email = data.get("Email");
+tempid = "602837000000461188";
+sendfrom = Map();
+sendfrom.put("email","imran@onetouchsupplies.co.uk");
+sendto = Map();
+sendto.put("email",email);
+tolist = List();
+tolist.add(sendto);
+tempmp = Map();
+tempmp.put("id","602837000002241038");
+mp = Map();
+mp.put("from",sendfrom);
+mp.put("to",tolist);
+intm = Map();
+intm.put("inventory_template",{"id":tempid,"name":"SalesOrder.pdf"});
+mp.put("inventory_details",intm);
+mp.put("template",tempmp);
+dlist = List();
+dlist.add(mp);
+data = Map();
+data.put("data",dlist);
+info "data >> " + data;
+send_mail = invokeurl
+[
+	url :"https://www.zohoapis.eu/crm/v2.1/sales_orders/" + id + "/actions/send_mail"
+	type :POST
+	parameters:data + ""
+	connection:"inventorytemplate"
+];
+info "send_mail >> " + send_mail;
+
+
+
+
+//////////////////////////@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+create a record in tracking more for parcelforce,dhl and royal mail and update in sales orders ;-
+
+
+
+id = "602837000002887407";
+data = zoho.crm.getRecordById("Sales_Orders", id);
+// info data;
+TrackingNumber = data.get("TrackingNumber");
+Subject = data.get("Subject");
+Tracking_Status = data.get("Tracking_Status");
+Out_of_delivery = data.get("Out_of_delivery");
+Order_Delivered = data.get("Order_Delivered");
+trackingid = data.get("trackingid");
+courier_code = data.get("courier_code");
+Contact_Name = data.get("Contact_Name");
+name = Contact_Name.get("name");
+head = Map();
+head.put("Content-Type","application/json");
+head.put("Tracking-Api-Key", "y9no5qgb-87fw-7qj6-11mc-bxygk9zs2yzq");
+head.put("Accept", "application/json");
+para ={"note":"","title":"","language":"en","courier_code":courier_code,"order_number":Subject,"customer_name":name,"tracking_number":TrackingNumber};
+if(trackingid == null){
+createtracking = invokeurl
+[
+	url: "https://api.trackingmore.com/v4/trackings/create"
+	type: POST
+	parameters: para.toString()
+	headers: head
+];
+trackingdatacreate =  createtracking.getjson("data");
+trackingid = trackingdatacreate.getJSON("id");
+updatedeal = map();
+updatedeal.put("trackingid", trackingid);
+updatedeal1 = zoho.crm.updateRecord("Sales_Orders", id,updatedeal);
+info updatedeal1;
+}
+if(trackingid != null ){
+gettracking = invokeurl
+[
+	url: "https://api.trackingmore.com/v4/trackings/get?tracking_numbers="+TrackingNumber+"&courier_code="+courier_code+"&archived_status=tracking&lang=en"
+	type: Get
+	headers: head
+];
+// info gettracking;
+trackingdata =  gettracking.getjson("data");
+statustracking = trackingdata.getJSON("delivery_status");
+origin_info = trackingdata.getJSON("origin_info");
+milestone_date = origin_info.get("milestone_date");
+outfordelivery_date = milestone_date.get("outfordelivery_date");
+delivery_date = milestone_date.get("delivery_date");
+updatedeal1 = map();
+updatedeal1.put("Tracking_Status", statustracking);
+updatedeal1.put("Out_of_delivery", outfordelivery_date);
+updatedeal1.put("Order_Delivered", delivery_date);
+updatedeal1 = zoho.crm.updateRecord("Sales_Orders",id,updatedeal1);
+info updatedeal1;
+}
+
+
+
+////////////////////////////@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+send mail if the date salesorder is more than 30 days.
+
+id = "602837000000895008";
+x = zoho.crm.getRecordById("Contacts",id);
+Email = x.get("Email");
+today = zoho.currentdate;
+data = zoho.crm.getRelatedRecords("SalesOrders","Contacts",id);
+recentPurchase = false;
+for each  salesOrder in data
+{
+	createTimestamp = salesOrder.get("Created_Time");
+	daysSinceCreation = days360(createTimestamp,today);
+	info daysSinceCreation;
+	if(daysSinceCreation <= 60)
+	{
+		recentPurchase = true;
+		break;
+	}
+}
+// info  daysSinceCreation;
+if(!recentPurchase)
+{
+	sendmail
+	[
+		from :zoho.loginuserid
+		to :"shivam.rajput@businessraisers.com"
+		 subject: "Reminder: We Miss You!"
+        message: "<div>Dear valued customer, it's been a while since your last purchase. We'd love to have you back!</div>"
+	]
+}
+
+
+
+
+//////////////////////@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+CQL code in zoho crm :-
+
+
+
+data = zoho.crm.getRecordById("Audit_Time_Calculators",id);
+if(data != null)
+{
+	Total = data.get("Total");
+	Site_Classification = data.get("Site_Classification");
+	Move_to_Higher_Time_Bracket_New_Employee_Count = data.get("Move_to_Higher_Time_Bracket_New_Employee_Count");
+	Move_to_Lower_Time_Bracket_New_Employee_Count = data.get("Move_to_Lower_Time_Bracket_New_Employee_Count");
+	No_of_Employees = data.get("No_of_Employees");
+	Reduction_where_significant_portion_of_staff_perf = data.get("Reduction_where_significant_portion_of_staff_perf");
+	if(Total == "")
+	{
+		Total = 0;
+	}
+	if(isnull(No_of_Employees))
+	{
+		No_of_Employees = 0;
+	}
+	if(Reduction_where_significant_portion_of_staff_perf == "")
+	{
+		Reduction_where_significant_portion_of_staff_perf = 0;
+	}
+	umber = "";
+	if(Move_to_Higher_Time_Bracket_New_Employee_Count != null)
+	{
+		umber = Move_to_Higher_Time_Bracket_New_Employee_Count;
+	}
+	else if(Move_to_Lower_Time_Bracket_New_Employee_Count != null)
+	{
+		umber = Move_to_Lower_Time_Bracket_New_Employee_Count;
+	}
+	else
+	{
+		umber = Total - No_of_Employees - Reduction_where_significant_portion_of_staff_perf;
+	}
+	updt = Map();
+	updt.put("Totalss",umber);
+// 	info updt;
+	updaterec = zoho.crm.updateRecord("Audit_Time_Calculators",id,updt);
+// 	info updaterec;
+	queryMap = Map();
+	queryMap.put("select_query","select High, Medium, Site_Start, Site_End, Low from Site_Classification where Site_Start <= " + umber + " and Site_End >= " + umber + " limit 1");
+	response = invokeurl
+	[
+		url :"https://www.zohoapis.com/crm/v5/coql"
+		type :POST
+		parameters:queryMap.toString()
+		connection:"coql"
+	];
+	siteData = response.get("data");
+	 if (siteData.size() > 0) {
+        siteInfo = siteData.get(0);
+        lowValue = siteInfo.get("Low");
+        mediumValue = siteInfo.get("Medium");
+		info mediumValue;
+        highValue = siteInfo.get("High");
+    }
+   updt = Map();
+    
+    if (Site_Classification == "Low") {
+        updt.put("S1_S2", lowValue);
+    } else if (Site_Classification == "Medium") {
+        updt.put("S1_S2", mediumValue);
+    } else if (Site_Classification == "High") {
+        updt.put("S1_S2", highValue);
+    }
+	info updt ;
+	 updaterecc = zoho.crm.updateRecord("Audit_Time_Calculators", id, updt);
+	 info "this is" + updaterecc;
+}
+else
+{
+	info "Record not found";
+}
+
+
+
+
+//////////////////////////@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Client script on field event on change to set a value in a field and update a field:-
+
+
+
+
+var Production_Employees = ZDK.Page.getField("Production_Employees").getValue();
+var Distribution_Risk_Level_1 = ZDK.Page.getField("Distribution_Risk_Level_1").getValue();
+var Distribution_Production_Worker_1 = ZDK.Page.getField("Distribution_Production_Worker_1").getValue();
+var Shift_2 = ZDK.Page.getField("Shift_2");
+var Shift_3 = ZDK.Page.getField("Shift_3");
+var For_Rotating_Shift = ZDK.Page.getField("For_Rotating_Shift");
+var Total_Distribution_1 = ZDK.Page.getField("Total_Distribution_1");
+
+if (Shift_2 != null) {
+    var Shift_2 = ZDK.Page.getField("Shift_2").getValue();
+    var For_2_Shifts = Math.ceil(Shift_2 * 0.3);
+}
+else {
+    var For_2_Shifts = 0;
+}
+
+if (Shift_3 != null) {
+    var Shift_3 = ZDK.Page.getField("Shift_3").getValue()
+    var For_3_Shifts =Math.ceil((Shift_2 + Shift_3) * 0.4);
+}
+else {
+    var For_3_Shifts = 0;
+}
+var For_Rotating_Shift =  Math.floor(Production_Employees * 0.4);
+
+
+if (Distribution_Risk_Level_1 === "Low") {
+  Distribution_Coefficient_1 = 0.5;
+} else if (Distribution_Risk_Level_1 === "Medium") {
+  Distribution_Coefficient_1 = 0.35;
+} else if (Distribution_Risk_Level_1 === "High") {
+  Distribution_Coefficient_1 = 0.15;
+} else {
+  Distribution_Coefficient_1 = 0; 
+}
+
+var Total_Distribution_1 = (((Production_Employees * Distribution_Production_Worker_1) - (For_2_Shifts + For_3_Shifts + For_Rotating_Shift)) * Distribution_Coefficient_1);
+ZDK.Page.getField("Total_Distribution_1").setValue(Total_Distribution_1);
+
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+Create a sales order from crm to zoho inventory:-
+
+
+
+
+connectionLive = "megnet_custom_connection_live";
+organizationID = "20086634738";
+// Get Quote Details from CRM
+salesorderDetails = zoho.crm.getRecordById("Sales_Orders",soId.tolong());
+Quotation_Number = salesorderDetails.get("Quotation_Number");
+// salesodo = salesorderDetails.get("id");
+// info salesodo;
+inventorySOid = salesorderDetails.get("inventorySOid");
+acctId = ifnull(salesorderDetails.get("Account_Name"),"").get("id");
+acctname = ifnull(salesorderDetails.get("Account_Name"),"").get("name");
+query_param = Map();
+jsonMap = Map();
+query_param.put("contact_name",acctname);
+response = zoho.inventory.getRecords("contacts",organizationID,query_param);
+resp_Mapsales = response.tomap();
+contactstring = resp_Mapsales.get("contacts");
+contactList = contactstring.tojsonlist();
+custId = contactList.getjson("contact_id");
+//info custId;
+//address add funtion
+response1 = zoho.inventory.getRecordsByID("contacts",organizationID,custId);
+//info  "res"+response1;
+//shipzipcode=ifnull(response1.get("billing_address"),"").get("zip");
+Purchase_order_No = ifnull(salesorderDetails.getjson("Purchase_order_No"),"");
+Chimera_Logo = ifnull(salesorderDetails.getjson("Chimera_Logo"),"");
+Megnet_Logo = ifnull(salesorderDetails.getjson("Megnet_Logo"),"");
+Require_a_customised_logo = ifnull(salesorderDetails.getjson("Require_a_customised_logo"),"");
+Packaging_Requirements = ifnull(salesorderDetails.getjson("Packaging_Requirements"),"");
+Delivery_Charge = ifnull(salesorderDetails.getjson("Delivery_Charge"),"Yes");
+Delivery_needs = ifnull(salesorderDetails.getjson("Delivery_needs"),"");
+Blind_Shipment = ifnull(salesorderDetails.getjson("Blind_Shipment"),"");
+Shipping_Expected = ifnull(salesorderDetails.getjson("Shipping_Expected"),"");
+Shipping_ASAP = ifnull(salesorderDetails.getjson("Shipping_ASAP"),"");
+AMWorld_Delivery_Notes = ifnull(salesorderDetails.getjson("AMWorld_Delivery_Notes"),"");
+Importance = ifnull(salesorderDetails.getjson("Importance"),"");
+UPC_unique_code_label = ifnull(salesorderDetails.getjson("UPC_unique_code_label"),"");
+Left_Northern_Ireland = ifnull(salesorderDetails.getjson("Left_Northern_Ireland"),"");
+Operations_Comments = ifnull(salesorderDetails.getjson("Operations_Comments"),"");
+Arrived_in_Northern_Ireland = ifnull(salesorderDetails.getjson("Arrived_in_Northern_Ireland"),"");
+Blind_Shipping_Company_Name = ifnull(salesorderDetails.getjson("Blind_Shipping_Company_Name"),"");
+Blind_Shipping_Phone_Number = ifnull(salesorderDetails.getjson("Blind_Shipping_Phone_Number"),"");
+Blind_Shipping_Contact_Name = ifnull(salesorderDetails.getjson("Blind_Shipping_Contact_Name"),"");
+Blind_Shipping_Email = ifnull(salesorderDetails.getjson("Blind_Shipping_Email"),"");
+Order_Processed_With = ifnull(salesorderDetails.getjson("Order_Processed_With"),"");
+customfieldmap = Map();
+dd = {{"value":Purchase_order_No,"customfield_id":"372967000002387264"},{"value":AMWorld_Delivery_Notes,"customfield_id":"372967000007472007"},{"value":Order_Processed_With,"customfield_id":"372967000012670833"},{"value":Importance,"customfield_id":"372967000009612012"},{"value":UPC_unique_code_label,"customfield_id":"372967000009612024"},{"value":Delivery_Charge,"customfield_id":"372967000009612028"},{"value":Shipping_Expected,"customfield_id":"372967000009612040"},{"value":Shipping_ASAP,"customfield_id":"372967000009612044"},{"value":Blind_Shipment,"customfield_id":"372967000009612052"},{"value":Left_Northern_Ireland,"customfield_id":"372967000009612072"},{"value":Operations_Comments,"customfield_id":"372967000009612080"},{"value":Arrived_in_Northern_Ireland,"customfield_id":"372967000009612084"},{"value":Blind_Shipping_Company_Name,"customfield_id":"372967000011683037"},{"value":Blind_Shipping_Phone_Number,"customfield_id":"372967000011683041"},{"value":Blind_Shipping_Contact_Name,"customfield_id":"372967000011683045"},{"value":Blind_Shipping_Email,"customfield_id":"372967000011683049"},{"value":Delivery_needs,"customfield_id":"372967000011683053"},{"value":Packaging_Requirements,"customfield_id":"372967000011683059"},{"value":Megnet_Logo,"cstomfield_id":"372967000011683073"},{"value":Chimera_Logo,"customfield_id":"372967000011683081"},{"value":Require_a_customised_logo,"customfield_id":"372967000011683089"},{"value":soId,"customfield_id":"372967000012132239"}};
+billingzip = ifnull(response1.get("contact").get("billing_address"),"").get("zip");
+billingcity = ifnull(response1.get("contact").get("billing_address"),"").get("city");
+billingcountry = ifnull(response1.get("contact").get("billing_address"),"").get("country");
+billaddress_id = ifnull(response1.get("contact").get("billing_address"),"").get("address_id");
+shipzip = ifnull(response1.get("contact").get("shipping_address"),"").get("zip");
+shipcity = ifnull(response1.get("contact").get("shipping_address"),"").get("city");
+shipcountry = ifnull(response1.get("contact").get("shipping_address"),"").get("country");
+shipaddress_id = ifnull(response1.get("contact").get("shipping_address"),"").get("address_id");
+ShippingStreet21 = ifnull(salesorderDetails.get("Shipping_Street_2"),"");
+ShippingStreet1 = ifnull(salesorderDetails.get("Shipping_Street"),"");
+//CRM Sales order billing and shipping
+ShippingCity1 = ifnull(salesorderDetails.get("Shipping_City"),"");
+ShippingCountry1 = ifnull(salesorderDetails.get("Shipping_Country"),"");
+ShippingCode = ifnull(salesorderDetails.get("Shipping_Code"),"");
+//biling crm record
+BillingCity1 = ifnull(salesorderDetails.get("Billing_City"),"");
+BillingCountry1 = ifnull(salesorderDetails.get("Billing_Country"),"");
+BillingCode = ifnull(salesorderDetails.get("Billing_Code"),"");
+BillingStreet21 = ifnull(salesorderDetails.get("Billing_Street_2"),"");
+BillingStreet1 = ifnull(salesorderDetails.get("Billing_Street"),"");
+if(ShippingCity1 != shipcity || ShippingCountry1 != shipcountry || ShippingCode != shipzip)
+{
+	JSONStringship = {"address":ShippingStreet1,"street2":ShippingStreet21,"city":ShippingCity1,"zip":ShippingCode,"country":ShippingCountry1};
+	url = "https://inventory.zoho.eu/api/v1/contacts/" + custId + "/address/" + shipaddress_id + "?organization_id=" + organizationID;
+	resp = invokeurl
+	[
+		url :url
+		type :PUT
+		parameters:JSONStringship + ""
+		connection:"megnet_custom_connection_live"
+	];
+	// 		info resp +"shipptestnventory";
+}
+if(BillingCity1 != shipcity || BillingCountry1 != shipcountry || BillingCode != billingzip)
+{
+	JSONStringbill = {"address":BillingStreet1,"street2":BillingStreet21,"city":BillingCity1,"zip":BillingCode,"country":BillingCountry1};
+	url = "https://inventory.zoho.eu/api/v1/contacts/" + custId + "/address/" + billaddress_id + "?organization_id=" + organizationID;
+	resp = invokeurl
+	[
+		url :url
+		type :PUT
+		parameters:JSONStringbill + ""
+		connection:"megnet_custom_connection_live"
+	];
+	// 	info resp +"billtestnventory";
+}
+//address add function end
+//currency update in contact
+AccounttDetails = zoho.crm.getRecordById("Accounts",acctId);
+// info AccounttDetails;
+Currencymap = Map();
+if(AccounttDetails.get("$currency_symbol") == "AED" && AccounttDetails.get("Currency") == "AED")
+{
+	Currencymap.put("currency_id","372967000000069073");
+}
+else if(AccounttDetails.get("$currency_symbol") == "$" && AccounttDetails.get("Currency") == "AUD")
+{
+	Currencymap.put("currency_id","372967000000000105");
+}
+else if(AccounttDetails.get("$currency_symbol") == "$" && AccounttDetails.get("Currency") == "CAD")
+{
+	Currencymap.put("currency_id","372967000000000101");
+}
+else if(AccounttDetails.get("$currency_symbol") == "CNY" && AccounttDetails.get("Currency") == "CNY")
+{
+	Currencymap.put("currency_id","372967000000000113");
+}
+else if(AccounttDetails.get("$currency_symbol") == "€" && AccounttDetails.get("Currency") == "EUR")
+{
+	Currencymap.put("currency_id","372967000000000109");
+	jsonMap.put("template_id",372967000000069245);
+}
+else if(AccounttDetails.get("$currency_symbol") == "£" && AccounttDetails.get("Currency") == "GBP")
+{
+	Currencymap.put("currency_id","372967000000000103");
+	jsonMap.put("template_id",372967000000069243);
+}
+else if(AccounttDetails.get("$currency_symbol") == "Rs" && AccounttDetails.get("Currency") == "INR")
+{
+	Currencymap.put("currency_id","372967000000000099");
+}
+else if(AccounttDetails.get("$currency_symbol") == "¥" && AccounttDetails.get("Currency") == "JPY")
+{
+	Currencymap.put("currency_id","372967000000000111");
+}
+else if(AccounttDetails.get("$currency_symbol") == "SAR" && AccounttDetails.get("Currency") == "SAR")
+{
+	Currencymap.put("currency_id","372967000000069071");
+}
+else if(AccounttDetails.get("$currency_symbol") == "$" && AccounttDetails.get("Currency") == "USD")
+{
+	Currencymap.put("currency_id","372967000000000097");
+	jsonMap.put("template_id",372967000000069231);
+}
+else if(AccounttDetails.get("$currency_symbol") == "R" && AccounttDetails.get("Currency") == "ZAR")
+{
+	Currencymap.put("currency_id","372967000000000107");
+}
+// info Currencymap;
+currecyresponse = zoho.inventory.updateRecord("contacts",organizationID,custId,Currencymap);
+info currecyresponse + "for currency update";
+//currency map end
+lineItemsList = List();
+count = 0;
+// lineItemstr = "[";
+quoteProdList = salesorderDetails.get("Product_Details").tojsonlist();
+//info quoteProdList;
+for each  rec in quoteProdList
+{
+	eachProd = rec.tomap();
+	ProdDecription = ifnull(eachProd.get("product_description"),"");
+	prodName = eachProd.get("product").get("name");
+	//info "productname: " + prodName;
+	crmpordId = eachProd.get("product").get("id");
+	qty = ifnull(eachProd.get("quantity"),"");
+	ListPrice = ifnull(eachProd.get("list_price"),"");
+	indTax = ifnull(eachProd.get("Tax"),"");
+	Total = ifnull(eachProd.get("total"),"");
+	zcrmId = eachProd.get("product").get("zcrm_product_id");
+	query_param = Map();
+	query_param.put("name",prodName);
+	itemDetails = zoho.inventory.getRecords("Items",organizationID,query_param);
+	//info itemDetails;
+	resp_items = itemDetails.tomap();
+	//info resp_items;
+	itemsstring = resp_items.get("items");
+	//info itemsstring;
+	itemList = itemsstring.tojsonlist();
+	itemId = itemList.getjson("item_id");
+	taxid = itemList.getjson("tax_id");
+	Prodcode = itemList.getjson("sku");
+	//itemsearchMap = itemsearch.toMap();
+	//itemDetails = itemsearchMap.get("items");
+	//itemdetailsStr = itemDetails.toJSONList();
+	lineItemMap = Map();
+	lineItemMap.put("item_id",itemId);
+	lineItemMap.put("name",prodName);
+	lineItemMap.put("description",ProdDecription);
+	lineItemMap.put("item_order",count);
+	lineItemMap.put("tax_id",taxid);
+	lineItemMap.put("rate",ListPrice);
+	lineItemMap.put("quantity",qty);
+	lineItemsList.add(lineItemMap);
+	count = count + 1;
+}
+lineItemstr = lineItemsList.toJSONlist();
+// 	lineItemstr = lineItemstr + "{" + "\"item_id\" : \"" + itemId + "\", \"name\" : \"" + prodName + "\", \"description\" : \"" + ProdDecription + "\", \"item_order\" : \"" + count + "\",\"tax_id\" : \"" + taxid + "\", \"rate\" : \"" + ListPrice + "\", \"quantity\" : \"" + qty + "\"},";
+// 	count = count + 1;
+// }
+// lineItemstr = removelastoccurence(lineItemstr,",");
+// lineItemstr = lineItemstr + "]";
+// //JSON String MAP construction to be used in Integration Task
+purchaseordernumber = ifnull(salesorderDetails.get("Purchase_order_No"),"");
+ShippingCity = ifnull(salesorderDetails.get("Shipping_City"),"");
+ShippingCountry = ifnull(salesorderDetails.get("Shipping_Country"),"");
+ShippingCode = ifnull(salesorderDetails.get("Shipping_Code"),"");
+ShippingStreet2 = ifnull(salesorderDetails.get("Shipping_Street_2"),"");
+ShippingStreet = ifnull(salesorderDetails.get("Shipping_Street"),"");
+// cfStrData = "[{\"value\":\"" + purchaseordernumber + "\",\"index\":1},{\"value\":\"" + ShippingStreet + "\",\"index\":2},{\"value\":\"" + ShippingStreet2 + "\",\"index\":3},{\"value\":\"" + ShippingCity + "\",\"index\":4},{\"value\":\"" + ShippingCode + "\",\"index\":5},{\"value\":\"" + ShippingCountry + "\",\"index\":6}]";
+jsonMap.put("customer_id",custId);
+jsonMap.put("line_items",lineItemstr);
+jsonMap.put("sub_total",ifnull(salesorderDetails.get("Sub_Total"),"0.0").todecimal());
+jsonMap.put("total",ifnull(salesorderDetails.get("Grand_Total"),"0.0").todecimal());
+jsonMap.put("tax_total",ifnull(salesorderDetails.get("Tax"),"0.0").todecimal());
+jsonMap.put("salesorder_number",ifnull(salesorderDetails.get("SO_Number"),""));
+jsonMap.put("reference_number",ifnull(salesorderDetails.get("Purchase_order_No"),""));
+jsonMap.put("delivery_method",ifnull(salesorderDetails.get("Carrier"),""));
+jsonMap.put("date",ifnull(salesorderDetails.get("Due Date"),""));
+jsonMap.put("shipment_date",ifnull(salesorderDetails.get("Expected_shipment_date"),""));
+jsonMap.put("notes",ifnull(salesorderDetails.get("Description"),""));
+jsonMap.put("terms",ifnull(salesorderDetails.get("Terms_and_Conditions"),""));
+// jsonMap.put("cf_crmsoid",ifnull(salesorderDetails.get("id"),""));
+jsonMap.put("custom_fields",dd);
+// jsonMap.put("cf_crmsoid", salesodo);
+optionalmap = Map();
+if(inventorySOid == null)
+{
+	// info jsonMap;
+	createOrder = zoho.inventory.createRecord("SalesOrders",organizationID,jsonMap);
+	salesOrderData = createOrder.get("salesorder");
+	salesOrderId = salesOrderData.get("salesorder_id");
+	sendmail
+	[
+		from :zoho.loginuserid
+		to :"kumar@megnet.co.uk"
+		cc:"kavita@businessraisers.com"
+		subject :Quotation_Number + " is created"
+		message :"<div>Hi Ops, <br><br> The Order is created in inventory " + Quotation_Number + "</div>Please check and process"
+	]
+	// 	info salesOrderId;
+	updatesales = Map();
+	updatesales.put("inventorySOid",salesOrderId);
+	Tech_up = zoho.crm.updateRecord("Sales_Orders",soId,updatesales);
+	info Tech_up;
+	// info salesOrderId;
+	// 	info createOrder;
+}
+else
+{
+	updateinventorySO = zoho.inventory.updateRecord("SalesOrders",organizationID,inventorySOid.toLong(),jsonMap);
+	sendmail
+	[
+		from :zoho.loginuserid
+		to :"kumar@megnet.co.uk"
+		cc:"kavita@businessraisers.com"
+		subject :Quotation_Number + " is updated"
+		message :"<div>Hi Ops, <br><br> The Order is updated in intentory " + Quotation_Number + "</div>Please check and process"
+	]
+	info "****" + updateinventorySO;
+}
+return "Successfully done the action";
+
